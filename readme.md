@@ -3,6 +3,7 @@
 **datasurgeon** is a precision toolkit for inspecting, cleaning, and prepping messy data — starting with raw strings and expanding toward CSV and DataFrame workflows.  
 Ideal for anyone working in data science, machine learning, or ETL pipelines.
 
+**Try the app here**: [datasurgeon on shinyapps.io](https://walsamer-datasurgeon.share.connect.posit.cloud)
 
 ## Features
 
