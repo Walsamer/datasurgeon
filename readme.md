@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://github.com/Walsamer/datasurgeon/raw/main/assets/data_surgeon_image.png" alt="Data Surgeon Banner" width="600"/>
+</p>
+
 # datasurgeon
 
 **datasurgeon** is a precision toolkit for inspecting, cleaning, and prepping messy data — starting with raw strings and expanding toward CSV and DataFrame workflows.  
