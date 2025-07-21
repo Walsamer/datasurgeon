@@ -10,12 +10,13 @@ ui.page_opts(title="Data Science toolbox", full_width=True)
 with ui.navset_tab(id="tab"):
     with ui.nav_panel("String Analyzer"):
 
-        default_string = "22 13 14 25"   #####SAMPLESTRING#####
+        default_string = "   \t42, 3.1415\t42e2 | Hello\tWorld\nThis is a test-string.   1\t2\t3,4,5 Whitespace    at  the   start and end    \n[END]\r"   #####SAMPLESTRING#####
         input_string = default_string
         ui.input_text_area("astring", "", value= default_string)
+        ui.input_checkbox(id="text_metrics", label="Analyze Text Metrics", value=True)
         ui.input_checkbox(id="replace", label="Replace Special Characters")
         ui.input_checkbox(id="extract_num", label="Extract And Analyze Numbers")
-        
+        ui.input_checkbox(id="plot_token_lengths", label="Plot Token Lengths")
         
         @render.express
         def analyze():
@@ -122,15 +123,26 @@ with ui.navset_tab(id="tab"):
 
                 stats = summarize_numbers(numerical_result["numbers"])
 
-                if input.extract_num():
+                if input.extract_num(): #Summary statistics for numerical values
                     with ui.card():
-                        ui.card_header("Summary Statistics")
+                        ui.card_header(f'Summary Statistics on "{find_numerical(input_string)["joined_string"]}"')
 
                         with ui.layout_columns():
                             for k, v in stats.items():
                                 with ui.card():
                                     ui.card_header(k.capitalize())
                                     ui.p(f"{v:.3f}" if isinstance(v, float) else str(v))
+
+                if input.plot_token_lengths(): #plot token length distribution
+                    with ui.card():
+                        ui.card_header("Token Length Distribution")
+                        @render.plot
+                        def token_length_distribution():
+                            tokens = tokenize(input.astring())  # Always pull fresh input!
+                            if not tokens:
+                                return
+                            plot_token_lengths_distr(tokens)
+
 
     # with ui.nav_menu("JSON/CSV converter"):
     # with ui.nav_panel("JSON to CSV"):
@@ -157,11 +169,13 @@ with ui.navset_tab(id="tab"):
 
 #string analyzer functions:
 def string_length(string):
+    """Returns the length of the string."""
     slength = int(len(string))
     return slength
 
 #trimming function
 def detect_trim_characters(string)-> dict:
+    """Detects leading and trailing whitespace characters in a string."""
     leading_trim = string[:len(string) - len(string.lstrip())]
     trailing_trim = string[len(string.rstrip()):]
     full_string = string 
@@ -205,6 +219,7 @@ def detect_trim_characters(string)-> dict:
 
 #show whitespace and other anoying stuff
 def visualize_special_chars(string) -> str:
+    """Replaces special characters in a string with placeholders."""
     return (
         string.replace("\t", "[TAB]")
          .replace("\n", "[LF]")
@@ -214,14 +229,17 @@ def visualize_special_chars(string) -> str:
 
 #counts the lines
 def line_count(string) -> str:
-    return len(string.splitlines())
+    """Counts the number of lines in a string."""
+    return len(string.splitlines()) + 1
 
 #helper function using html to supress collapsing html/ white space
 def html_escape(s: str) -> str:
+    """Escapes HTML special characters in a string."""
     return html.escape(s)
 
 #helper function to detect separators
 def detect_separator(string: str, candidates=None) -> dict:
+    """Detects the most common separator in a string."""
     if candidates is None:
         candidates = [",", ";", "|", "\t", " ", ":", "-", "~", "#"]
 
@@ -245,9 +263,18 @@ def detect_separator(string: str, candidates=None) -> dict:
     else:
         return None
 
+#tokenize the string
+def tokenize(string: str) -> list[str]:
+    """Tokenizes a string into words."""
+    #default separator is [SPACE]
+    if detect_separator(string) is None or detect_separator(string)["separator"] == "[SPACE]":
+        return string.split()
+    else:
+        return string.split(sep = detect_separator(string)["separator"])
 
 #finding numerical values: 
 def find_numerical(string: str) -> dict[str, str | list[str]]:
+    """Finds standalone numerical values in a string."""
     def is_valid_float_or_scientific(s: str) -> bool:
         try:
             float(s)
@@ -262,8 +289,9 @@ def find_numerical(string: str) -> dict[str, str | list[str]]:
         "joined_string": ", ".join(numerical_values)
     }
 
-
+#Summary statistics for numerical values
 def summarize_numbers(numbers: list[str]) -> dict[str, float]:
+    """Calculates summary statistics for a list of numbers."""
     floats = np.array([float(n) for n in numbers], dtype=np.float64)
     if floats.size == 0:
         return {}
@@ -279,20 +307,27 @@ def summarize_numbers(numbers: list[str]) -> dict[str, float]:
         "q3": float(np.percentile(floats, 75)),
     }
 
-#newly added function - not implemented in the UI yet
-def plot_token_lengths(tokens: list[str]) -> None:
+# Plot token lengths (distribution)
+
+def plot_token_lengths_distr(tokens: list[str]) -> None: #
     """Create a bar plot of the lengths of the tokens."""
     lengths = [len(token) for token in tokens]
+    length_counts = Counter(lengths)
+    lengths_sorted = sorted(length_counts.items())
+    x = [str(length) for length, _count in lengths_sorted]
+    y = [count for _length, count in lengths_sorted]
+
     plt.figure()
-    plt.bar(range(len(lengths)), lengths, color='skyblue')
-    plt.xlabel('Token Index')
-    plt.ylabel('Token Length')
-    plt.title('Token Lengths')
-    plt.xticks(range(len(lengths)), rotation=45)
+    plt.bar(x, y, color='skyblue')
+    plt.xlabel('Token Length')
+    plt.ylabel('Token Count')
+    plt.title('Token Length Distribution')
     plt.tight_layout()
     return plt
 
+#newly added function - not implemented in the UI yet
 def missing_heatmap(df):
+    """Create a heatmap of missing values in a DataFrame."""
     plt.imshow(df.isnull(), aspect='auto', cmap='gray_r')
     plt.title("Missing Value Heatmap")
     plt.xlabel("Columns")
