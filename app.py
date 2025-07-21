@@ -3,14 +3,14 @@ from shiny.express import input, render, ui, expressify
 import html
 from collections import Counter
 import numpy as np
-
+import matplotlib.pyplot as plt
 
 ui.page_opts(title="Data Science toolbox", full_width=True)
 
 with ui.navset_tab(id="tab"):
     with ui.nav_panel("String Analyzer"):
 
-        default_string = "Send me your 33 12 string! ;-)"   #####SAMPLESTRING#####
+        default_string = "22 13 14 25"   #####SAMPLESTRING#####
         input_string = default_string
         ui.input_text_area("astring", "", value= default_string)
         ui.input_checkbox(id="replace", label="Replace Special Characters")
@@ -117,7 +117,7 @@ with ui.navset_tab(id="tab"):
                         if int(len(find_numerical(input_string)) > 0): #shows count of numerical values
                             with ui.card():
                                     ui.card_header("Standalone Numbers")
-                                    ui.p(len(find_numerical(input_string)))
+                                    ui.p(len(find_numerical(input_string)['numbers']))
 
 
                 stats = summarize_numbers(numerical_result["numbers"])
@@ -246,7 +246,6 @@ def detect_separator(string: str, candidates=None) -> dict:
         return None
 
 
-#FIX BUG!
 #finding numerical values: 
 def find_numerical(string: str) -> dict[str, str | list[str]]:
     def is_valid_float_or_scientific(s: str) -> bool:
@@ -257,6 +256,7 @@ def find_numerical(string: str) -> dict[str, str | list[str]]:
             return False
 
     numerical_values = [word for word in string.split() if is_valid_float_or_scientific(word)]
+    print(numerical_values)
     return {
         "numbers": numerical_values,
         "joined_string": ", ".join(numerical_values)
@@ -279,8 +279,25 @@ def summarize_numbers(numbers: list[str]) -> dict[str, float]:
         "q3": float(np.percentile(floats, 75)),
     }
 
+#newly added function - not implemented in the UI yet
+def plot_token_lengths(tokens: list[str]) -> None:
+    """Create a bar plot of the lengths of the tokens."""
+    lengths = [len(token) for token in tokens]
+    plt.figure()
+    plt.bar(range(len(lengths)), lengths, color='skyblue')
+    plt.xlabel('Token Index')
+    plt.ylabel('Token Length')
+    plt.title('Token Lengths')
+    plt.xticks(range(len(lengths)), rotation=45)
+    plt.tight_layout()
+    return plt
 
-
+def missing_heatmap(df):
+    plt.imshow(df.isnull(), aspect='auto', cmap='gray_r')
+    plt.title("Missing Value Heatmap")
+    plt.xlabel("Columns")
+    plt.ylabel("Rows")
+    plt.show()
 
 #styling of the string boxes
 ui.tags.style("""
@@ -293,4 +310,3 @@ ui.tags.style("""
         font-size: 0.875rem;
     }
 """)
-
