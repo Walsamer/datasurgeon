@@ -132,7 +132,7 @@ with ui.navset_tab(id="tab"):
 
                     if input.extract_num(): #Summary statistics for numerical values
                         with ui.card():
-                            ui.card_header(f'Summary Statistics on {find_numerical(input_string)["joined_string"]}')
+                            ui.card_header(f"Summary Statistics On Extracted Numbers:")
 
                             with ui.layout_columns():
                                 for k, v in stats.items():
