@@ -8,6 +8,8 @@ from shiny import reactive
 from shiny.express import input, render, ui, expressify
 from collections import Counter
 
+app = expressify()
+
 ui.page_opts(title="Data Science toolbox", full_width=True)
 
 with ui.navset_tab(id="tab"):
