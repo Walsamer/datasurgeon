@@ -55,70 +55,71 @@ with ui.navset_tab(id="tab"):
                                 duration=5,
                             )
 
-                with ui.card(): # Text Metrics Box
-                    ui.card_header("Text Metrics")
-                    with ui.layout_columns():
-                        with ui.card(): #show length
-                            ui.card_header("Length")
-                            ui.p(string_length(input_string))
-                        
-                        result = detect_trim_characters(input_string)
-                        case = result["case"]
+                if input.text_metrics(): #show text metrics
+                    with ui.card(): # Text Metrics Box
+                        ui.card_header("Text Metrics")
+                        with ui.layout_columns():
+                            with ui.card(): #show length
+                                ui.card_header("Length")
+                                ui.p(string_length(input_string))
+                            
+                            result = detect_trim_characters(input_string)
+                            case = result["case"]
 
-                        if case == "both":  #start and end trimmed
-                            with ui.card():
-                                ui.card_header("Trimmed Length")
-                                ui.p(result["length_after_trim"])
-                            with ui.card():
-                                ui.card_header("Trimmable end")
-                                ui.p(result["trailing"])
-                            with ui.card():
-                                ui.card_header("Trimmable start")
-                                ui.p(result["leading"])
-                        if case == "leading_only": #only trimmed at the beginning
-                            with ui.card():
-                                ui.card_header("Trimmed Length")
-                                ui.p(result["length_after_trim"])
-                            with ui.card():
-                                ui.card_header("Trimmable start")
-                                ui.p(result["leading"])
-                        if case == "trailing_only": #only trimmed at the end
-                            with ui.card():
-                                ui.card_header("Trimmed Length")
-                                ui.p(result["length_after_trim"])
-                            with ui.card():
-                                ui.card_header("Trimmable end")
-                                ui.p(result["trailing"])
-                        if case == "none": #not trimmed
-                            with ui.card():
-                                ui.card_header("Trimmed Length")
-                                ui.p(result["length_after_trim"])
-                        if "\r" in input_string or "\n" in input_string: #line count
-                            with ui.card():
-                                ui.card_header("Lines")
-                                ui.p(line_count(input_string))
-                        if " " in input_string: #white space count
-                            num_white_spaces = input_string.count(" ")
-                            with ui.card():
-                                ui.card_header("White Spaces")
-                                ui.p(num_white_spaces)
-                        if "\t" in input_string: #tab count
-                            num_tabs = input_string.count("\t")
-                            with ui.card():
-                                ui.card_header("Tabs")
-                                ui.p(num_tabs)
-                        separator_dict = detect_separator(input_string)
-                        if separator_dict:#shows most likely separator and count
-                            with ui.card():
-                                ui.card_header("Separator count")
-                                ui.p(separator_dict["count"])
-                            with ui.card():
-                                ui.card_header("Most Likely Separator")
-                                ui.p(separator_dict["separator"])
-                        if int(len(find_numerical(input_string)) > 0): #shows count of numerical values
-                            with ui.card():
-                                    ui.card_header("Standalone Numbers")
-                                    ui.p(len(find_numerical(input_string)['numbers']))
+                            if case == "both":  #start and end trimmed
+                                with ui.card():
+                                    ui.card_header("Trimmed Length")
+                                    ui.p(result["length_after_trim"])
+                                with ui.card():
+                                    ui.card_header("Trimmable end")
+                                    ui.p(result["trailing"])
+                                with ui.card():
+                                    ui.card_header("Trimmable start")
+                                    ui.p(result["leading"])
+                            if case == "leading_only": #only trimmed at the beginning
+                                with ui.card():
+                                    ui.card_header("Trimmed Length")
+                                    ui.p(result["length_after_trim"])
+                                with ui.card():
+                                    ui.card_header("Trimmable start")
+                                    ui.p(result["leading"])
+                            if case == "trailing_only": #only trimmed at the end
+                                with ui.card():
+                                    ui.card_header("Trimmed Length")
+                                    ui.p(result["length_after_trim"])
+                                with ui.card():
+                                    ui.card_header("Trimmable end")
+                                    ui.p(result["trailing"])
+                            if case == "none": #not trimmed
+                                with ui.card():
+                                    ui.card_header("Trimmed Length")
+                                    ui.p(result["length_after_trim"])
+                            if "\r" in input_string or "\n" in input_string: #line count
+                                with ui.card():
+                                    ui.card_header("Lines")
+                                    ui.p(line_count(input_string))
+                            if " " in input_string: #white space count
+                                num_white_spaces = input_string.count(" ")
+                                with ui.card():
+                                    ui.card_header("White Spaces")
+                                    ui.p(num_white_spaces)
+                            if "\t" in input_string: #tab count
+                                num_tabs = input_string.count("\t")
+                                with ui.card():
+                                    ui.card_header("Tabs")
+                                    ui.p(num_tabs)
+                            separator_dict = detect_separator(input_string)
+                            if separator_dict:#shows most likely separator and count
+                                with ui.card():
+                                    ui.card_header("Separator count")
+                                    ui.p(separator_dict["count"])
+                                with ui.card():
+                                    ui.card_header("Most Likely Separator")
+                                    ui.p(separator_dict["separator"])
+                            if int(len(find_numerical(input_string)) > 0): #shows count of numerical values
+                                with ui.card():
+                                        ui.card_header("Standalone Numbers")
+                                        ui.p(len(find_numerical(input_string)['numbers']))
 
 
                 stats = summarize_numbers(numerical_result["numbers"])
