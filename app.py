@@ -9,6 +9,8 @@ import re
 from shiny import reactive
 from shiny.express import input, render, ui, expressify
 from collections import Counter
+from pandas.api import types as ptypes
+from decimal import Decimal
 
 app = expressify()
 raw_data = reactive.value(None) #datacleaner
@@ -207,18 +209,18 @@ with ui.navset_tab(id="tab"):
                     choices = [],
                     multiple = True
                 )
-                # ui.input_select(
-                #     id = "missing_strategy",
-                #     label = "With NaNs",
-                #     choices = [
-                #         "No change",
-                #         "Replace with 0",
-                #         "Replace with mean",
-                #         "Replace with median",
-                #         "Drop rows"
-                #     ],
-                #     selected = "No change"
-                # )
+                ui.input_select(
+                    id = "missing_strategy",
+                    label = "With NaNs",
+                    choices = [
+                        "No change",
+                        "Replace with 0",
+                        "Replace with mean",
+                        "Replace with median",
+                        "Drop rows"
+                    ],
+                    selected = "No change"
+                )
                 # ui.input_selectize(
                 #     id = "transform_cols",
                 #     label = "Columns to transform",
@@ -235,42 +237,43 @@ with ui.navset_tab(id="tab"):
                 # ui.hr()
 
 
-                # ui.input_action_button( # clean button
-                #     id = "clean_butt",
-                #     label = "Clean"
-                # )
+                ui.input_action_button( # clean button
+                    id = "clean_butt",
+                    label = "Clean"
+                )
 
-                # @render.download(label="Download cleaned data", filename="data_cleaned.csv")
-                # def download_data():
-                #     df = cleaned_data.get()
-                #     if cleaned_data.get() is not None:
-                #         with io.StringIO() as output:
-                #             cleaned_data.get().to_csv(output, index=False)
-                #             yield output.getvalue()
-                #     else:
-                #         with io.StringIO() as output:
-                #             pd.DataFrame.to_csv(output, index=False)
-                #             yield output.getvalue()
+                @render.download(label="Download cleaned data", filename="data_cleaned.csv")
+                def download_data():
+                    df = cleaned_data.get()
+                    if cleaned_data.get() is not None:
+                        with io.StringIO() as output:
+                            cleaned_data.get().to_csv(output, index=False)
+                            yield output.getvalue()
+                    else:
+                        with io.StringIO() as output:
+                            pd.DataFrame.to_csv(output, index=False)
+                            yield output.getvalue()
                 
-                # ui.input_action_button( # reset button
-                #     id = "reset_butt",
-                #     label = "Reset"
-                # )
+                ui.input_action_button( # reset button
+                    id = "reset_butt",
+                    label = "Reset"
+                )
             with ui.navset_pill():
                 with ui.nav_panel("Data"):
+
                     @reactive.effect
                     @reactive.event(input.file)
                     def load_file():
-                        file = (input.file)
+                        file = input.file()
                         if not file:
                             return
                         try:
-                            df = pd.read_csv(file()[0]["datapath"])
+                            df = pd.read_csv(file[0]["datapath"])
                             raw_data.set(df)
                             cleaned_data.set(df.copy())
 
                             ui.update_text("fileinfo",)
-                            ui.update_selectize("drop_columns", choices=df.columns.tolist(), selected=[])
+                            ui.update_selectize("remove_cols", choices=df.columns.tolist(), selected=[])
                             ui.update_select("nan_strategy", selected="No change")
                             ui.update_selectize("transform_columns", choices=df.select_dtypes(include='number').columns.tolist(), selected=[])
 
@@ -279,7 +282,7 @@ with ui.navset_tab(id="tab"):
 
                             raw_data.set(None)
                             cleaned_data.set(None)
-                            ui.update_selectize("drop_columns", choices=[], selected=[])
+                            ui.update_selectize("remove_cols", choices=[], selected=[])
 
                     @reactive.effect
                     @reactive.event(input.reset_btn)
@@ -287,17 +290,19 @@ with ui.navset_tab(id="tab"):
                         df = raw_data.get()
                         if df is not None:
                             cleaned_data.set(df.copy())
-                            ui.update_selectize("drop_columns", selected=[])
+                            ui.update_selectize("remove_cols", selected=[])
                             ui.update_select("nan_strategy", selected="No change")
                             ui.update_selectize("transform_columns", selected=[])
                             ui.update_select("transform_strategy", selected="No change")
+                            ui.update_text("fileinfo", value="")
 
                         else:
                             cleaned_data.set(None) 
-                            ui.update_selectize("drop_columns", selected=[])
+                            ui.update_selectize("remove_cols", selected=[])
                             ui.update_select("nan_strategy", selected="No change")
                             ui.update_selectize("transform_columns", selected=[])
                             ui.update_select("transform_strategy", selected="No change")
+                            ui.update_text("fileinfo", value="")
 
                     @render.data_frame
                     def render_df():
@@ -309,6 +314,75 @@ with ui.navset_tab(id="tab"):
                             return df_raw
                         return pd.DataFrame() #returning an empty dataframe if no data is loaded.
                     
+
+                    # Clean button
+                    @reactive.effect
+                    @reactive.event(input.clean_butt)
+                    def clean_data():
+                        # always work with a copy of the data so that the original data is not modified
+                        df = cleaned_data.get() 
+                        if df is None:
+                            df = raw_data.get()
+                            if df is None:
+                                return
+                        df = df.copy()
+
+                        #removing columns
+                        cols_to_drop = input.remove_cols()
+                        ex_cols = []
+                        if cols_to_drop:
+                            for cols in cols_to_drop:
+                                if cols in df.columns:
+                                    ex_cols.append(cols)
+                            if ex_cols:
+                                df = df.drop(columns=ex_cols)
+
+                        #fill missing values (NaNs)
+                        strategy = input.missing_strategy()
+                        numeric_cols = df.select_dtypes(include="number").columns
+
+                        if strategy == "No change":
+                            pass
+                        elif strategy == "Replace with 0":
+                            df[numeric_cols] = df[numeric_cols].fillna(0)
+                        elif strategy == "Replace with mean":
+                            for col in numeric_cols:
+                                s = df[col]
+                                non_null = s.dropna()
+                                if non_null.empty:
+                                    continue
+                                fill_val = non_null.mean()
+                                filled = s.fillna(fill_val)
+                                if ptypes.is_integer_dtype(s.dtype):
+                                    df[col] = filled.round(0).astype(int)
+                                else:
+                                    decs = max_decimal_places(non_null)
+                                    df[col] = filled.round(decs)
+                        elif strategy == "Replace with median":
+                            for col in numeric_cols:
+                                s = df[col]
+                                non_null = s.dropna()
+                                if non_null.empty:
+                                    continue
+                                fill_val = non_null.median()
+                                filled = s.fillna(fill_val)
+                                if ptypes.is_integer_dtype(s.dtype):
+                                    df[col] = filled.round(0).astype(int)
+                                else:
+                                    decs = max_decimal_places(non_null)
+                                    df[col] = filled.round(decs)
+                        elif strategy == "Drop rows":
+                            df= df.dropna()
+                        
+
+                        
+
+
+
+                        cleaned_data.set(df)
+
+
+
                 #with ui.nav_panel("Analyzation"):
 
 
@@ -536,7 +610,6 @@ def missing_heatmap(df):
 
 
 
-
 ###functions for Data Cleaner
 
 def human_readable_size(size_bytes: int) -> str:
@@ -556,6 +629,10 @@ def human_readable_size(size_bytes: int) -> str:
         return f"{int(size)} {units[idx]}"
     return f"{size:.2f} {units[idx]}"
 
+def max_decimal_places(series):
+    vals = series.dropna().astype(str)
+    dec_counts = vals.map(lambda s: len(s.split(".", 1)[1]) if "." in s else 0)
+    return int(dec_counts.max()) if not dec_counts.empty else 0
 
 
 
