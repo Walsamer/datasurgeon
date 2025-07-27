@@ -3,6 +3,7 @@ import html
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 import io
 import re
 
@@ -248,7 +249,6 @@ with ui.navset_tab(id="tab"):
                         choices = [
                             "No change",
                             "Replace with most common string",
-                            "Replace with least common string",
                             "Replace with custom value",
                             "Drop rows"
                         ]
@@ -261,7 +261,6 @@ with ui.navset_tab(id="tab"):
                             "Replace with median",
                             "Replace with custom value",
                             "Replace with most common string",
-                            "Replace with least common string",
                             "Drop rows"
                         ]
 
@@ -492,12 +491,6 @@ with ui.navset_tab(id="tab"):
                             for col in str_cols:
                                 df[col] = df[col].fillna(most_common_string(df[col]))
 
-                        elif strategy == "Replace with least common string":
-                            if not str_cols:
-                                ui.notification_show("No string columns to fill.", type="warning", duration=5)
-                            for col in str_cols:
-                                df[col] = df[col].fillna(least_common_string(df[col]))
-
                         elif strategy == "Drop rows":
                             df = df.dropna(subset=chosen_cols)
 
@@ -508,11 +501,29 @@ with ui.navset_tab(id="tab"):
 
 
                         cleaned_data.set(df)
-
-
-
-                #with ui.nav_panel("Analyzation"):
-
+                with ui.nav_panel("Overview"):
+                    
+                    @render.data_frame
+                    @reactive.event(input.analyze_butt)
+                    def missing_summary():
+                        if cleaned_data is None:
+                            df = raw_data.get()
+                        else:
+                            df = cleaned_data.get()
+                        if df is not None:
+                            na_counts = df.isnull().sum()
+                            summary = pd.DataFrame({
+                                "Column": df.columns,
+                                "Missing values": na_counts.values,
+                                "Missing %": np.round((na_counts.values / len(df)) * 100, 2),
+                                "Data type": df.dtypes.values,
+                                "Nr. of unique values": df.nunique().values,
+                                "Zero count": df.apply(lambda col: (col == 0).sum() if pd.api.types.is_numeric_dtype(col) else np.nan),
+                                "Is constant": df.nunique() == 1,
+                                "Most common": df.apply(lambda col: col.mode().iloc[0] if not col.mode().empty else np.nan)
+                            })
+                            return summary.sort_values(by="Missing values", ascending=False)
+                    
 
 
 
@@ -770,10 +781,14 @@ def least_common_string(series: pd.Series) -> str:
     return counts.index[-1] if not counts.empty else ""
 
 
-
-
-
-
+def missing_value_summary(df):
+    summary = pd.DataFrame({
+        "Dtype": df.dtypes,
+        "Missing Count": df.isnull().sum(),
+        "Missing %": (df.isnull().mean() * 100).round(1),
+        "Unique Values": df.nunique()
+    })
+    return summary.sort_values("Missing %", ascending=False)
 
 
 #styling of the string boxes
