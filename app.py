@@ -24,169 +24,169 @@ cleaned_data = reactive.value(None) #datacleaner
 ui.page_opts(title="Data Science toolbox", full_width=True)
 
 with ui.navset_tab(id="tab"):
-    # with ui.nav_panel("String Analyzer"):
+    with ui.nav_panel("String Analyzer"):
 
-    #     default_string = "1 1 1 1 22 22 22 222 22 22 222 22  33333 3 3 3 123 123 123 123 431234 1234 1234 1234 1234 0987654 0987654 098765431 9870123098 09817230987123090 0987120987309 0981723098123 0918230981723 09187230198273 09187230918273 01983271039287 1039278 1039287 1039287 1230978 1230 987"   #####SAMPLESTRING#####
-    #     input_string = default_string
-    #     with ui.layout_sidebar():
-    #         with ui.sidebar(width=300):
-    #             ui.input_text_area("astring", "", value= default_string)
-    #             ui.input_switch(id="text_metrics", label="Analyze Text Metrics")
-    #             ui.input_switch(id="replace", label="Replace Special Characters")
-    #             ui.input_switch(id="extract_num", label="Extract And Analyze Numbers")
-    #             ui.input_switch(id="plot_token_lengths", label="Plot Token Lengths", value=True)
+        default_string = "1 1 1 1 22 22 22 222 22 22 222 22  33333 3 3 3 123 123 123 123 431234 1234 1234 1234 1234 0987654 0987654 098765431 9870123098 09817230987123090 0987120987309 0981723098123 0918230981723 09187230198273 09187230918273 01983271039287 1039278 1039287 1039287 1230978 1230 987"   #####SAMPLESTRING#####
+        input_string = default_string
+        with ui.layout_sidebar():
+            with ui.sidebar(width=300):
+                ui.input_text_area("astring", "", value= default_string)
+                ui.input_switch(id="text_metrics", label="Analyze Text Metrics")
+                ui.input_switch(id="replace", label="Replace Special Characters")
+                ui.input_switch(id="extract_num", label="Extract And Analyze Numbers")
+                ui.input_switch(id="plot_token_lengths", label="Plot Token Lengths", value=True)
                     
-    #         @render.express
-    #         def analyze():
-    #             #if input.astring() != default_string: #replace == with !=
-    #                 input_string = input.astring()
-    #                 with ui.card(class_="astring"):#show raw string
-    #                     ui.card_header("Overview")
-    #                     ui.help_text("Raw String:")
-    #                     ui.p(html_escape(input.astring()), class_="text-box")
+            @render.express
+            def analyze():
+                #if input.astring() != default_string: #replace == with !=
+                    input_string = input.astring()
+                    with ui.card(class_="astring"):#show raw string
+                        ui.card_header("Overview")
+                        ui.help_text("Raw String:")
+                        ui.p(html_escape(input.astring()), class_="text-box")
 
 
 
 
                         
-    #                     if input.replace() == True: #show string with placeholders
-    #                         if visualize_special_chars(input_string) != input_string:
-    #                             ui.help_text("String with replaced special characters:")
-    #                             ui.p(visualize_special_chars(input_string), class_="text-box")
-    #                         else:
-    #                             _ = ui.notification_show(
-    #                                     f"No replaceable special characters found.",
-    #                                     type="error",
-    #                                     duration=5,
-    #                                 )
+                        if input.replace() == True: #show string with placeholders
+                            if visualize_special_chars(input_string) != input_string:
+                                ui.help_text("String with replaced special characters:")
+                                ui.p(visualize_special_chars(input_string), class_="text-box")
+                            else:
+                                _ = ui.notification_show(
+                                        f"No replaceable special characters found.",
+                                        type="error",
+                                        duration=5,
+                                    )
                         
-    #                     numerical_result = find_numerical(input_string)
+                        numerical_result = find_numerical(input_string)
                         
-    #                     if input.extract_num(): #show extracted numbers
-    #                         if numerical_result["numbers"]:
-    #                             ui.help_text("Extracted Numbers")
-    #                             ui.p(numerical_result["joined_string"], class_="text-box")
-    #                         else:
-    #                             _ = ui.notification_show(
-    #                                 "No standalone numbers found.",
-    #                                 type="error",
-    #                                 duration=5,
-    #                             )
-    #                 if input.text_metrics(): #show text metrics
-    #                     with ui.card(): # Text Metrics Box
-    #                         ui.card_header("Text Metrics")
-    #                         with ui.layout_columns():
-    #                             with ui.card(): #show length
-    #                                 ui.card_header("Length")
-    #                                 ui.p(string_length(input_string))
+                        if input.extract_num(): #show extracted numbers
+                            if numerical_result["numbers"]:
+                                ui.help_text("Extracted Numbers")
+                                ui.p(numerical_result["joined_string"], class_="text-box")
+                            else:
+                                _ = ui.notification_show(
+                                    "No standalone numbers found.",
+                                    type="error",
+                                    duration=5,
+                                )
+                    if input.text_metrics(): #show text metrics
+                        with ui.card(): # Text Metrics Box
+                            ui.card_header("Text Metrics")
+                            with ui.layout_columns():
+                                with ui.card(): #show length
+                                    ui.card_header("Length")
+                                    ui.p(string_length(input_string))
                                 
-    #                             result = detect_trim_characters(input_string)
-    #                             case = result["case"]
+                                result = detect_trim_characters(input_string)
+                                case = result["case"]
 
-    #                             if case == "both":  #start and end trimmed
-    #                                 with ui.card():
-    #                                     ui.card_header("Trimmed Length")
-    #                                     ui.p(result["length_after_trim"])
-    #                                 with ui.card():
-    #                                     ui.card_header("Trimmable end")
-    #                                     ui.p(result["trailing"])
-    #                                 with ui.card():
-    #                                     ui.card_header("Trimmable start")
-    #                                     ui.p(result["leading"])
-    #                             if case == "leading_only": #only trimmed at the beginning
-    #                                 with ui.card():
-    #                                     ui.card_header("Trimmed Length")
-    #                                     ui.p(result["length_after_trim"])
-    #                                 with ui.card():
-    #                                     ui.card_header("Trimmable start")
-    #                                     ui.p(result["leading"])
-    #                             if case == "trailing_only": #only trimmed at the end
-    #                                 with ui.card():
-    #                                     ui.card_header("Trimmed Length")
-    #                                     ui.p(result["length_after_trim"])
-    #                                 with ui.card():
-    #                                     ui.card_header("Trimmable end")
-    #                                     ui.p(result["trailing"])
-    #                             if case == "none": #not trimmed
-    #                                 with ui.card():
-    #                                     ui.card_header("Trimmed Length")
-    #                                     ui.p(result["length_after_trim"])
-    #                             if "\r" in input_string or "\n" in input_string: #line count
-    #                                 with ui.card():
-    #                                     ui.card_header("Lines")
-    #                                     ui.p(line_count(input_string))
-    #                             if " " in input_string: #white space count
-    #                                 num_white_spaces = input_string.count(" ")
-    #                                 with ui.card():
-    #                                     ui.card_header("White Spaces")
-    #                                     ui.p(num_white_spaces)
-    #                             if "\t" in input_string: #tab count
-    #                                 num_tabs = input_string.count("\t")
-    #                                 with ui.card():
-    #                                     ui.card_header("Tabs")
-    #                                     ui.p(num_tabs)
-    #                             separator_dict = detect_separator(input_string)
-    #                             if separator_dict:#shows most likely separator and count
-    #                                 with ui.card():
-    #                                     ui.card_header("Separator count")
-    #                                     ui.p(separator_dict["count"])
-    #                                 with ui.card():
-    #                                     ui.card_header("Most Likely Separator")
-    #                                     ui.p(separator_dict["separator"])
-    #                             if int(len(find_numerical(input_string)) > 0): #shows count of numerical values
-    #                                 with ui.card():
-    #                                         ui.card_header("Standalone Numbers")
-    #                                         ui.p(len(find_numerical(input_string)['numbers']))
+                                if case == "both":  #start and end trimmed
+                                    with ui.card():
+                                        ui.card_header("Trimmed Length")
+                                        ui.p(result["length_after_trim"])
+                                    with ui.card():
+                                        ui.card_header("Trimmable end")
+                                        ui.p(result["trailing"])
+                                    with ui.card():
+                                        ui.card_header("Trimmable start")
+                                        ui.p(result["leading"])
+                                if case == "leading_only": #only trimmed at the beginning
+                                    with ui.card():
+                                        ui.card_header("Trimmed Length")
+                                        ui.p(result["length_after_trim"])
+                                    with ui.card():
+                                        ui.card_header("Trimmable start")
+                                        ui.p(result["leading"])
+                                if case == "trailing_only": #only trimmed at the end
+                                    with ui.card():
+                                        ui.card_header("Trimmed Length")
+                                        ui.p(result["length_after_trim"])
+                                    with ui.card():
+                                        ui.card_header("Trimmable end")
+                                        ui.p(result["trailing"])
+                                if case == "none": #not trimmed
+                                    with ui.card():
+                                        ui.card_header("Trimmed Length")
+                                        ui.p(result["length_after_trim"])
+                                if "\r" in input_string or "\n" in input_string: #line count
+                                    with ui.card():
+                                        ui.card_header("Lines")
+                                        ui.p(line_count(input_string))
+                                if " " in input_string: #white space count
+                                    num_white_spaces = input_string.count(" ")
+                                    with ui.card():
+                                        ui.card_header("White Spaces")
+                                        ui.p(num_white_spaces)
+                                if "\t" in input_string: #tab count
+                                    num_tabs = input_string.count("\t")
+                                    with ui.card():
+                                        ui.card_header("Tabs")
+                                        ui.p(num_tabs)
+                                separator_dict = detect_separator(input_string)
+                                if separator_dict:#shows most likely separator and count
+                                    with ui.card():
+                                        ui.card_header("Separator count")
+                                        ui.p(separator_dict["count"])
+                                    with ui.card():
+                                        ui.card_header("Most Likely Separator")
+                                        ui.p(separator_dict["separator"])
+                                if int(len(find_numerical(input_string)) > 0): #shows count of numerical values
+                                    with ui.card():
+                                            ui.card_header("Standalone Numbers")
+                                            ui.p(len(find_numerical(input_string)['numbers']))
 
 
-    #                 stats = summarize_numbers(numerical_result["numbers"])
+                    stats = summarize_numbers(numerical_result["numbers"])
 
-    #                 if input.extract_num(): #Summary statistics for numerical values
-    #                     with ui.card():
-    #                         ui.card_header(f"Summary Statistics On Extracted Numbers:")
+                    if input.extract_num(): #Summary statistics for numerical values
+                        with ui.card():
+                            ui.card_header(f"Summary Statistics On Extracted Numbers:")
 
-    #                         with ui.layout_columns():
-    #                             for k, v in stats.items():
-    #                                 with ui.card():
-    #                                     ui.card_header(k.capitalize())
-    #                                     ui.p(f"{v:.3f}" if isinstance(v, float) else str(v))
+                            with ui.layout_columns():
+                                for k, v in stats.items():
+                                    with ui.card():
+                                        ui.card_header(k.capitalize())
+                                        ui.p(f"{v:.3f}" if isinstance(v, float) else str(v))
 
-    #                 if input.plot_token_lengths(): #plot token length distribution
-    #                     with ui.card():
-    #                         ui.card_header("Token Length Distribution")
-    #                         @render.plot
-    #                         def token_length_distribution():
-    #                             tokens = tokenize(input.astring())  # Always pull fresh input!
-    #                             if not tokens:
-    #                                 return
-    #                             plot_token_lengths_distr(tokens)
-    #                         @render.download(
-    #                                 label = "Download Plot",
-    #                                 filename= "token_length_distribution.svg"
-    #                         )
-    #                         def download_token_plot():
-    #                             #recompute the plot
-    #                             tokens = tokenize(input.astring())  
-    #                             if not tokens:
-    #                                 return
-    #                             counts = Counter(len(t) for t in tokens)
-    #                             min_len, max_len = min(counts), max(counts)
-    #                             x = list(range(min_len, max_len + 1))
-    #                             y = [counts.get(length, 0) for length in x]
+                    if input.plot_token_lengths(): #plot token length distribution
+                        with ui.card():
+                            ui.card_header("Token Length Distribution")
+                            @render.plot
+                            def token_length_distribution():
+                                tokens = tokenize(input.astring())  # Always pull fresh input!
+                                if not tokens:
+                                    return
+                                plot_token_lengths_distr(tokens)
+                            @render.download(
+                                    label = "Download Plot",
+                                    filename= "token_length_distribution.svg"
+                            )
+                            def download_token_plot():
+                                #recompute the plot
+                                tokens = tokenize(input.astring())  
+                                if not tokens:
+                                    return
+                                counts = Counter(len(t) for t in tokens)
+                                min_len, max_len = min(counts), max(counts)
+                                x = list(range(min_len, max_len + 1))
+                                y = [counts.get(length, 0) for length in x]
 
-    #                             fig, ax = plt.subplots()
-    #                             ax.bar(x, y, color="skyblue")
-    #                             ax.set_xlabel("Token Length")
-    #                             ax.set_ylabel("Token Count")
-    #                             ax.set_title("Token Length Distribution")
-    #                             ax.set_xticks(x)
-    #                             fig.tight_layout()
+                                fig, ax = plt.subplots()
+                                ax.bar(x, y, color="skyblue")
+                                ax.set_xlabel("Token Length")
+                                ax.set_ylabel("Token Count")
+                                ax.set_title("Token Length Distribution")
+                                ax.set_xticks(x)
+                                fig.tight_layout()
                                 
-    #                             #write to an in‑memory buffer
-    #                             buf = io.BytesIO()
-    #                             fig.savefig(buf, format="svg")
-    #                             buf.seek(0)
-    #                             yield buf.getvalue()
+                                #write to an in‑memory buffer
+                                buf = io.BytesIO()
+                                fig.savefig(buf, format="svg")
+                                buf.seek(0)
+                                yield buf.getvalue()
 
     with ui.nav_panel("Data Cleaner"):
         with ui.layout_sidebar():
@@ -209,18 +209,81 @@ with ui.navset_tab(id="tab"):
                     choices = [],
                     multiple = True
                 )
+
+                ui.hr()
+
+                ui.h5("Deal with NaNs")
+
                 ui.input_select(
-                    id = "missing_strategy",
-                    label = "With NaNs",
-                    choices = [
-                        "No change",
-                        "Replace with 0",
-                        "Replace with mean",
-                        "Replace with median",
-                        "Drop rows"
-                    ],
-                    selected = "No change"
+                    id = "chosen_cols",
+                    label = "Column scope",
+                    choices=["Only numerical", "Only string", "Custom"],
+                    selected="Only numerical"
                 )
+                @render.express
+                def show_custom_cols():
+                    if input.chosen_cols() == "Custom":
+                        ui.input_selectize(
+                            id = "cols_to_modify",
+                            label = "Custom column list",
+                            choices=[],  # dynamically updated
+                            multiple=True
+                )
+
+                @render.express
+                def strategy_input():
+                    scope = input.chosen_cols()
+                    choices = []
+
+                    if scope == "Only numerical":
+                        choices = [
+                            "No change",
+                            "Replace with 0",
+                            "Replace with mean",
+                            "Replace with median",
+                            "Replace with custom value",
+                            "Drop rows"
+                        ]
+                    elif scope == "Only string":
+                        choices = [
+                            "No change",
+                            "Replace with most common string",
+                            "Replace with least common string",
+                            "Replace with custom value",
+                            "Drop rows"
+                        ]
+                    elif scope == "Custom":
+                        # mixed: show all strategies
+                        choices = [
+                            "No change",
+                            "Replace with 0",
+                            "Replace with mean",
+                            "Replace with median",
+                            "Replace with custom value",
+                            "Replace with most common string",
+                            "Replace with least common string",
+                            "Drop rows"
+                        ]
+
+                    ui.input_select(
+                        id="missing_values_strat",
+                        label="Missing value strategy",
+                        choices=choices,
+                        selected="No change"
+                    )
+
+                @render.express
+                def show_custom_nan_filler():
+                    if input.missing_values_strat() == "Replace with custom value":
+                        #with ui.card():
+                                ui.input_text(
+                                id = "custom_nan_filler",
+                                label = "Set your custom value:",
+                                value = ""
+                            )
+                
+                ui.hr()
+                
                 # ui.input_selectize(
                 #     id = "transform_cols",
                 #     label = "Columns to transform",
@@ -274,8 +337,10 @@ with ui.navset_tab(id="tab"):
 
                             ui.update_text("fileinfo",)
                             ui.update_selectize("remove_cols", choices=df.columns.tolist(), selected=[])
+                            ui.update_selectize("cols_to_modify", choices=df.columns.tolist(), selected=[])
                             ui.update_select("nan_strategy", selected="No change")
                             ui.update_selectize("transform_columns", choices=df.select_dtypes(include='number').columns.tolist(), selected=[])
+
 
                         except Exception as e:
                             ui.notification_show(f"Error loading file: {e}", duration = 5, type="error")
@@ -291,6 +356,7 @@ with ui.navset_tab(id="tab"):
                         if df is not None:
                             cleaned_data.set(df.copy())
                             ui.update_selectize("remove_cols", selected=[])
+                            ui.update_selectize("cols_to_modify", selected=[])
                             ui.update_select("nan_strategy", selected="No change")
                             ui.update_selectize("transform_columns", selected=[])
                             ui.update_select("transform_strategy", selected="No change")
@@ -303,6 +369,16 @@ with ui.navset_tab(id="tab"):
                             ui.update_selectize("transform_columns", selected=[])
                             ui.update_select("transform_strategy", selected="No change")
                             ui.update_text("fileinfo", value="")
+
+                    @reactive.effect
+                    @reactive.event(input.chosen_cols)
+                    def update_cols_to_modify_on_scope_change():
+                        if input.chosen_cols() == "Custom":
+                            df = cleaned_data.get()
+                            if df is None:
+                                df = raw_data.get()
+                            if df is not None:
+                                ui.update_selectize("cols_to_modify", choices=df.columns.tolist(), selected=[])
 
                     @render.data_frame
                     def render_df():
@@ -338,15 +414,34 @@ with ui.navset_tab(id="tab"):
                                 df = df.drop(columns=ex_cols)
 
                         #fill missing values (NaNs)
-                        strategy = input.missing_strategy()
-                        numeric_cols = df.select_dtypes(include="number").columns
+                        strategy = input.missing_values_strat()
+
+                        scope = input.chosen_cols()
+
+                        if scope == "Only numerical":
+                            chosen_cols = df.select_dtypes(include="number").columns.tolist()
+                        elif scope == "Only string":
+                            chosen_cols = df.select_dtypes(include=["object", "string"]).columns.tolist()
+                        elif scope == "Custom":
+                            chosen_cols = list(input.cols_to_modify())
+
+                            if not chosen_cols:
+                                ui.notification_show("No custom columns selected. Please select at least one.", type="warning", duration=5)
+                                return
+
+                        num_cols = df[chosen_cols].select_dtypes(include="number").columns.tolist()
+                        str_cols = df[chosen_cols].select_dtypes(include=["object", "string"]).columns.tolist()
 
                         if strategy == "No change":
                             pass
                         elif strategy == "Replace with 0":
-                            df[numeric_cols] = df[numeric_cols].fillna(0)
+                            if num_cols:
+                                df[num_cols] = df[num_cols].fillna(0)
+                            if str_cols:
+                                ui.notification_show("Cannot fill strings with 0. Skipped string columns.", type="warning", duration=5)
+
                         elif strategy == "Replace with mean":
-                            for col in numeric_cols:
+                            for col in num_cols:
                                 s = df[col]
                                 non_null = s.dropna()
                                 if non_null.empty:
@@ -358,8 +453,11 @@ with ui.navset_tab(id="tab"):
                                 else:
                                     decs = max_decimal_places(non_null)
                                     df[col] = filled.round(decs)
+                            if str_cols:
+                                ui.notification_show("Mean only applies to numeric columns. Skipped string columns.", type="warning", duration=5)
+
                         elif strategy == "Replace with median":
-                            for col in numeric_cols:
+                            for col in num_cols:
                                 s = df[col]
                                 non_null = s.dropna()
                                 if non_null.empty:
@@ -371,9 +469,39 @@ with ui.navset_tab(id="tab"):
                                 else:
                                     decs = max_decimal_places(non_null)
                                     df[col] = filled.round(decs)
+                            if str_cols:
+                                ui.notification_show("Median only applies to numeric columns. Skipped string columns.", type="warning", duration=5)
+
+                        elif strategy == "Replace with custom value":
+                            try:
+                                val = input.custom_nan_filler()
+                                try:
+                                    fill_val = float(val)
+                                    if num_cols:
+                                        df[num_cols] = df[num_cols].fillna(fill_val)
+                                except ValueError:
+                                    pass  # not a float
+                                if str_cols:
+                                    df[str_cols] = df[str_cols].fillna(val)
+                            except Exception as e:
+                                ui.notification_show(f"Error applying custom fill: {e}", type="error", duration=5)
+
+                        elif strategy == "Replace with most common string":
+                            if not str_cols:
+                                ui.notification_show("No string columns to fill.", type="warning", duration=5)
+                            for col in str_cols:
+                                df[col] = df[col].fillna(most_common_string(df[col]))
+
+                        elif strategy == "Replace with least common string":
+                            if not str_cols:
+                                ui.notification_show("No string columns to fill.", type="warning", duration=5)
+                            for col in str_cols:
+                                df[col] = df[col].fillna(least_common_string(df[col]))
+
                         elif strategy == "Drop rows":
-                            df= df.dropna()
-                        
+                            df = df.dropna(subset=chosen_cols)
+
+                                                
 
                         
 
@@ -634,6 +762,12 @@ def max_decimal_places(series):
     dec_counts = vals.map(lambda s: len(s.split(".", 1)[1]) if "." in s else 0)
     return int(dec_counts.max()) if not dec_counts.empty else 0
 
+def most_common_string(series: pd.Series) -> str:
+    return series.dropna().mode().iloc[0] if not series.dropna().empty else ""
+
+def least_common_string(series: pd.Series) -> str:
+    counts = series.dropna().value_counts()
+    return counts.index[-1] if not counts.empty else ""
 
 
 
