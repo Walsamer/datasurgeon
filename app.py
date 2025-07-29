@@ -14,10 +14,12 @@ from shinywidgets import render_widget
 from collections import Counter
 from pandas.api import types as ptypes
 from decimal import Decimal
+from functools import wraps
 
 app = expressify()
 raw_data = reactive.value(None) #datacleaner
 cleaned_data = reactive.value(None) #datacleaner
+column_choices = reactive.value([]) #plotting
 
 ui.page_opts(title="Data Science toolbox", full_width=True)
 
@@ -345,15 +347,15 @@ with ui.card():
                                 df = pd.read_csv(file[0]["datapath"])
                                 raw_data.set(df)
                                 cleaned_data.set(df.copy())
+                                cols = df.columns.tolist()
 
                                 ui.update_text("fileinfo",)
                                 ui.update_selectize("remove_cols", choices=df.columns.tolist(), selected=[])
                                 ui.update_selectize("cols_to_modify", choices=df.columns.tolist(), selected=[])
                                 ui.update_select("nan_strategy", selected="No change")
                                 ui.update_selectize("transform_columns", choices=df.select_dtypes(include='number').columns.tolist(), selected=[])
-                                ui.update_select("x_axis", choices=df.columns.tolist())
-                                ui.update_select("y_axis", choices=df.columns.tolist())
-
+                                ui.update_selectize("x_axis", choices=cols, selected= cols[0] if cols else None)
+                                ui.update_selectize("y_axis", choices=cols, selected=cols[1] if len(cols) > 1 else (cols[0] if cols else None))
 
                             except Exception as e:
                                 ui.notification_show(f"Error loading file: {e}", duration = 5, type="error")
@@ -531,22 +533,46 @@ with ui.card():
         with ui.nav_panel("Plotting"):
             with ui.layout_sidebar():
                 with ui.sidebar(width=300):
-                    ui.input_select("plot_type", "Plot Type", choices=["Histogram"], selected="Histogram") #, "Boxplot", "Scatter", "Heatmap"
+                    ui.input_select("plot_type", "Plot Type", choices=["Histogram", "Boxplot"], selected="Histogram") #, "Scatter", "Heatmap"
                     
                     @render.express
                     def show_x_axis_field():
-                        if input.plot_type() in ["Histogram"]: #, "Boxplot", "Scatter", "Heatmap"
-                            ui.input_selectize("x_axis", "X-Axis", choices = [], selected = None)
+                        if input.plot_type() in ["Histogram", "Boxplot"]: #, "Scatter", "Heatmap"
+                            df = cleaned_data.get()
+                            if df is None:
+                                return
+                            cols = df.columns.tolist()
+                            ui.input_selectize("x_axis", "X-Axis", choices = cols, selected = cols[0] if cols else None)
 
-                    # @render.express
-                    # def show_y_axis_field():
-                    #     if input.plot_type() in ["Boxplot", "Scatter"]: #== "Boxplot" or input.plot_type() == "Scatter":
-                    #         ui.input_selectize("y_axis", "Y-Axis", choices = [], selected = None)
+                    @render.express
+                    def show_y_axis_field():
+                        if input.plot_type() in ["Boxplot"]: #, "Scatter"     // == "Boxplot" or input.plot_type() == "Scatter":
+                            df = cleaned_data.get()
+                            if df is None:
+                                return
+                            cols = df.columns.tolist()
+                            ui.input_selectize("y_axis", "Y-Axis", choices = cols, selected=cols[1] if len(cols) > 1 else (cols[0] if cols else None))
 
-                    ui.input_select("group_by", "Color / Group by", choices=["None"], selected="None")
+                    @render.express
+                    def show_group_by():
+                        if input.plot_type() in ["Histogram"]:
+                            df = cleaned_data.get()
+                            if df is None:
+                                return
+                            cols = df.columns.tolist()
+                            ui.input_select("group_by", "Group by", choices= ["None"] + cols, selected="None")
+                   
+                    @render.express
+                    def show_underlaying_points():
+                        if input.plot_type() in ["Boxplot"]:
+                            df = cleaned_data.get()
+                            if df is None:
+                                return
+                            ui.input_select("show_points", "Show underlying data points", choices = ['all', 'outliers', 'suspectedoutliers', False])
+                   
                     # ui.input_select("histfunc", "Aggregation Function", choices=["count", "sum", "avg", "min", "max"], selected="count")
 
-                    ui.input_switch("plot_dimensions", "Auto-size plot") #, value = True
+                    ui.input_switch("plot_dimensions", "Auto-size plot", value = True)
                     ui.help_text("Scales the plot automatically to fit the window size")
                     @render.express
                     def show_help_text_plotting():
@@ -559,7 +585,7 @@ with ui.card():
                             ui.input_slider("y_height", "Set height (px)", min=100, max=800, value=400, step=10)
 
 
-                with ui.card(style="overflow-x: auto; overflow-y: auto; max-height: 700px;"):
+                with ui.card(style="overflow-x: auto; overflow-y: auto; max-height: 800px;"):
 
 
                     @render_widget
@@ -567,14 +593,37 @@ with ui.card():
                         plot_type = input.plot_type()
                         if plot_type == "Histogram":
                             return plot_histogram()
-                        # elif plot_type == "Boxplot":
-                        #     return plot_boxplot()
+                        elif plot_type == "Boxplot":
+                            return plot_boxplot()
                         # elif plot_type == "Scatter":
                         #     return plot_scatter()
                         # elif plot_type == "Heatmap":
                         #     return plot_heatmap()
                         else:
-                            return go.Figure().update_layout(title="Unsupported plot type")
+                            fig = None
+                        if fig is None:
+                            # Build an empty figure with a “help” annotation
+                            fig = go.Figure()
+                            fig.add_annotation(
+                                text=(
+                                    "🚧 Plot unavailable\n"
+                                    "• Make sure you’ve uploaded a CSV\n"
+                                    "• Selected valid X (and Y) columns\n"
+                                    "• Dropped or filled missing values"
+                                ),
+                                xref="paper", yref="paper",
+                                x=0.5, y=0.5,
+                                showarrow=False,
+                                font=dict(size=14),
+                                align="center",
+                            )
+                            fig.update_layout(
+                                xaxis={"visible": False},
+                                yaxis={"visible": False},
+                                margin=dict(t=20, b=20, l=20, r=20),
+                            )
+
+                        return fig
 
 
 
@@ -837,6 +886,7 @@ def missing_value_summary(df):
 
 ###functions for Plotting:
 
+
 def plot_histogram():
     df = cleaned_data.get()
     if df is None or df.empty:
@@ -844,6 +894,12 @@ def plot_histogram():
     
     x = input.x_axis()
     color_argument = input.group_by() if input.group_by() != "None" else None
+
+    # 1) ensure we have a clean frame
+    plot_df = df[[x, y]].dropna()
+    if plot_df.empty:
+        return None
+
 
     if color_argument == None:
         pass
@@ -868,6 +924,43 @@ def plot_histogram():
 
     return fig
 
+def plot_boxplot():
+    df = cleaned_data.get()
+    if df is None or df.empty:
+        return go.Figure().update_layout(title="No data available.")
+    
+    x = input.x_axis()
+    y = input.y_axis()
+    points = input.show_points() #always a string
+    
+    # 1) ensure we have a clean frame
+    plot_df = df[[x, y]].dropna()
+    if plot_df.empty:
+        return None
+
+        # map the string "False" back to the Python False, leave everything else alone
+    if points == "False":
+        points = False
+    else:
+        pass
+
+
+    layout_kwargs = {
+        "title": {"text": f"Boxplot of {x}", "x": 0.5},
+        "xaxis_title": x,
+        "yaxis_title": y,
+    }
+
+    if not input.plot_dimensions():
+        layout_kwargs["width"] = input.x_width()
+        layout_kwargs["height"] = input.y_height()
+
+    fig = px.box(df, x=x, y=y,points=points).update_layout(**layout_kwargs)
+    
+    return fig
+
+
+
 #styling of the string boxes
 ui.tags.style("""
     .text-box {
@@ -879,4 +972,3 @@ ui.tags.style("""
         font-size: 0.875rem;
     }
 """)
-
