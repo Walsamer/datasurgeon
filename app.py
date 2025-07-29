@@ -602,20 +602,17 @@ with ui.card():
                         else:
                             fig = None
                         if fig is None:
-                            # Build an empty figure with a “help” annotation
+                            # still return a Figure, but with instructional text
                             fig = go.Figure()
                             fig.add_annotation(
                                 text=(
-                                    "🚧 Plot unavailable\n"
-                                    "• Make sure you’ve uploaded a CSV\n"
-                                    "• Selected valid X (and Y) columns\n"
-                                    "• Dropped or filled missing values"
+                                    "Plot unavailable\n"
+                                    "- For Histogram: select an X-Axis\n"
+                                    "- For Boxplot: select both X- and Y-Axis\n"
+                                    "- Ensure those columns contain no missing values"
                                 ),
-                                xref="paper", yref="paper",
-                                x=0.5, y=0.5,
-                                showarrow=False,
-                                font=dict(size=14),
-                                align="center",
+                                xref="paper", yref="paper", x=0.5, y=0.5,
+                                showarrow=False, font=dict(size=12), align="left"
                             )
                             fig.update_layout(
                                 xaxis={"visible": False},
@@ -886,7 +883,22 @@ def missing_value_summary(df):
 
 ###functions for Plotting:
 
+def try_dirty(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        try:
+            return fn(*args, **kwargs)
+        except Exception as e:
+            ui.notification_show(
+                f"Plot error: {e} ...NaNs have been dropped automatically. For propper data handling go to Data Cleaner first, reload Data, clean your NaNs and then plot!",
+                type="error",
+                duration=20
+            )
+            # signal “no plot” to the render_widget
+            return None
+    return wrapper
 
+@try_dirty
 def plot_histogram():
     df = cleaned_data.get()
     if df is None or df.empty:
@@ -896,14 +908,12 @@ def plot_histogram():
     color_argument = input.group_by() if input.group_by() != "None" else None
 
     # 1) ensure we have a clean frame
-    plot_df = df[[x, y]].dropna()
+    plot_df = df[[x]].dropna()
     if plot_df.empty:
         return None
 
-
     if color_argument == None:
         pass
-    
 
     layout_kwargs = {
         "title": {"text": f"Histogram of {x}", "x": 0.5},
@@ -916,7 +926,7 @@ def plot_histogram():
         layout_kwargs["height"] = input.y_height()
 
     fig = px.histogram(
-        data_frame=df,
+        data_frame=plot_df,
         x=input.x_axis(),
         color=color_argument,
         nbins=50
@@ -924,6 +934,7 @@ def plot_histogram():
 
     return fig
 
+@try_dirty
 def plot_boxplot():
     df = cleaned_data.get()
     if df is None or df.empty:
@@ -955,7 +966,7 @@ def plot_boxplot():
         layout_kwargs["width"] = input.x_width()
         layout_kwargs["height"] = input.y_height()
 
-    fig = px.box(df, x=x, y=y,points=points).update_layout(**layout_kwargs)
+    fig = px.box(plot_df, x=x, y=y,points=points).update_layout(**layout_kwargs)
     
     return fig
 
