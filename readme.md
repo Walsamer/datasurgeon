@@ -49,21 +49,15 @@ Ideal for anyone working in data science, machine learning, or ETL pipelines.
 </p>
 
 <p align="center">
-  <img src="https://github.com/Walsamer/datasurgeon/raw/main/assets/histogram_grouped_horizonal.png" alt="Histogram grouped by category" width="700"/>
+  <img src="https://github.com/Walsamer/datasurgeon/raw/main/assets/histogram_grouped_horizontal.png" alt="Histogram grouped by category" width="700"/>
   <br/>
-  <em>Histogram with optional Group by (color) and manual sizing controls.</em>
+  <em>Histogram with optional Group by (color) and manual sizing controls in darkmode.</em>
 </p>
 
 <p align="center">
   <img src="https://github.com/Walsamer/datasurgeon/raw/main/assets/boxplot_underlaying_points.png" alt="Boxplot with points" width="700"/>
   <br/>
   <em>Boxplot with underlying data points: all, outliers, suspected outliers, or none.</em>
-</p>
-
-<p align="center">
-  <img src="https://github.com/Walsamer/datasurgeon/raw/main/assets/cleaned_data_download.png" alt="Download cleaned data" width="700"/>
-  <br/>
-  <em>Download cleaned results as CSV / JSON / XML.</em>
 </p>
 
 ## Why?
