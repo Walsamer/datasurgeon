@@ -35,8 +35,22 @@ Ideal for anyone working in data science, machine learning, or ETL pipelines.
 - **Download**
   - Export cleaned data as **CSV / JSON / XML** (filename adapts to selected format)
 
+- **LLM Utilities (new 🚀)**
+  - `llm_chat.py`: interactive chat with a chosen LLM, configurable for dataset-aware Q&A  
+  - `llm_test.py`: run automated evaluations of datasets with LLM prompts and log results  
+  - `api_checker.py`: verify API availability/keys before starting experiments  
+  - Store test results in timestamped `.csv` files for reproducibility
+
+- **Tests**
+  - Custom datasets can be placed in `data/other_testsets/`
+  - Example: `crocodile_data.csv` with label `"crocodile"`
+  - Results saved as `modules/test_results_<timestamp>.csv`  
+  - Designed for reproducible benchmarking of prompt strategies and data cleaning methods
+
 - **Architecture**
-  - Modular code in `modules/`: `data_io.py`, `data_cleaner.py`, `data_visualizer.py`, `string_inspector.py`
+  - Modular code in `modules/`:  
+    - Data: `data_io.py`, `data_cleaner.py`, `data_visualizer.py`, `string_inspector.py`  
+    - LLM: `llm_chat.py`, `llm_test.py`, `api_checker.py`  
   - Built with [Shiny for Python (Express)](https://shiny.posit.co/py/) + `shinywidgets`
   - Dark mode toggle 🌙/☀️
 
@@ -83,7 +97,6 @@ python -m shiny run --reload app.py
 ## Coming soon
 - Additional plot types (scatter, heatmap)
 - One-click data profiling report (Markdown/HTML)
-- Tabular RAG-LLM integration: retrieve-augmented generation over your DataFrame (column-aware prompting, per-row context windows, and guided summaries) to answer questions about your dataset directly inside the app.
 
 ## Project structure
 ```
@@ -93,7 +106,12 @@ datasurgeon/
 │  ├─ data_cleaner.py
 │  ├─ data_io.py
 │  ├─ data_visualizer.py
-│  └─ string_inspector.py
+│  ├─ string_inspector.py
+│  ├─ api_checker.py
+│  ├─ llm_chat.py
+│  └─ llm_test.py
+├─ data/
+│  └─ other_testsets/      # local datasets for LLM tests
 ├─ assets/
 ├─ requirements.txt
 └─ readme.md
