@@ -445,6 +445,7 @@ with ui.card():
             except Exception as e:
                 chat_module = None
                 chat_enabled = False
+                print(f"Chat module initialization failed: {e}") # For debugging purposes
             
             if chat_enabled:
                 # Create chat interface
@@ -508,9 +509,9 @@ with ui.card():
 
 
 #############---------------------------------------
-                    ui.p("Upload a dataset and ask questions about it. (Feature coming soon!)")
+                    ui.p("Upload a dataset and ask questions about it. ")
             with ui.card():
-                ui.p("This features is under development.")
+                ui.p("Note: A google api key is needed for this function to work properly.")
         ui.nav_spacer()
         with ui.nav_control():
             ui.input_dark_mode(id="mode")

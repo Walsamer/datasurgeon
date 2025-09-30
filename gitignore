@@ -1,0 +1,11 @@
+# Created by venv; see https://docs.python.org/3/library/venv.html
+
+#ignore API keys and environment variables
+.env
+#ignore DATA files
+data/other_testsets
+
+#ignore work in progress files and tests
+modules/testing_edge_cases.py
+modules/test_results_20250930_180325.csv
+__app.py
