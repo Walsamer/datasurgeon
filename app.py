@@ -3,15 +3,17 @@ from pathlib import Path
 
 import pandas as pd
 from shiny import reactive
-from shiny.express import input, render, ui, expressify
+from shiny.express import input, render, ui
 from shinywidgets import render_widget
+from dotenv import load_dotenv
 
 from modules.string_inspector import StringInspector
 from modules.data_io import DataIO
 from modules.data_cleaner import DataCleaner
 from modules.data_visualizer import DataVisualizer
+from modules.llm_chat import ChatModule
 
-app = expressify()
+
 raw_data = reactive.value(None)
 cleaned_data = reactive.value(None)
 
@@ -435,6 +437,80 @@ with ui.card():
                         import plotly.graph_objects as go
                         return go.Figure().update_layout(title="Unknown plot type")
 
+        with ui.nav_panel("Chat with Data"):
+            # Initialize chat module
+            try:
+                chat_module = ChatModule()
+                chat_enabled = True
+            except Exception as e:
+                chat_module = None
+                chat_enabled = False
+            
+            if chat_enabled:
+                # Create chat interface
+                chat = ui.Chat(id="chat")
+                chat.ui(
+                    messages=[{
+                        "content": "Hello! How can I assist you with your data today?",
+                        "role": "assistant"
+                    }],
+                    width="100%",
+                )
+                
+                # Store the last processed message index
+                last_processed = reactive.value(0)
+                
+                # Handle messages
+                @reactive.effect
+                @reactive.event(chat.messages)
+                async def respond():
+                    all_messages = chat.messages()
+                    
+                    # Check if there's a new user message
+                    if len(all_messages) > last_processed.get():
+                        # Look for unprocessed user messages
+                        for i in range(last_processed.get(), len(all_messages)):
+                            msg = all_messages[i]
+                            if msg["role"] == "user":
+                                # Process this user message
+                                user_text = msg["content"]
+                                
+                                # Update last processed index
+                                last_processed.set(len(all_messages))
+                                
+                                # Check if we have data loaded
+                                df = cleaned_data.get()
+                                if df is not None:
+                                    chat_module.set_dataframe(df)
+                                
+                                # Get response from LLM - pass the actual text, not the list!
+                                response = chat_module.chat(user_text)
+                                
+                                # Add response to chat
+                                await chat.append_message({
+                                    "content": response,
+                                    "role": "assistant"
+                                })
+                                
+                                # Update counter again after adding our message
+                                last_processed.set(len(all_messages) + 1)
+                                
+                                # Only process one user message at a time
+                                break
+                    else:
+                        ui.card()
+                        ui.card_header("Setup Required"),
+                        ui.p("Add GOOGLE_API_KEY to your .env file")
+                        
+
+
+
+
+
+#############---------------------------------------
+                    ui.p("Upload a dataset and ask questions about it. (Feature coming soon!)")
+            with ui.card():
+                ui.p("This features is under development.")
         ui.nav_spacer()
         with ui.nav_control():
             ui.input_dark_mode(id="mode")

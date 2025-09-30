@@ -1,0 +1,18 @@
+test_name,query,duration,passed,timestamp
+BI Cleaning: Quality Issues Detection,Identify all data quality problems,13.578432083129883,True,2025-09-30T18:01:05.519871
+BI Cleaning: Missing Data Analysis,How much data is missing and where?,1.7021231651306152,True,2025-09-30T18:01:07.222161
+BI Cleaning: Cleaning Recommendations,How should I clean this dataset?,7.423334836959839,True,2025-09-30T18:01:14.645698
+BI Cleaning: Anomaly Detection,Are there any suspicious values?,11.854918003082275,True,2025-09-30T18:01:26.501018
+BI Cleaning: Completeness Assessment,What percentage of the data is complete?,3.147732973098755,True,2025-09-30T18:01:29.648869
+Employee: Productivity Overview,Summarize employee productivity,1.9438271522521973,True,2025-09-30T18:01:31.594728
+Employee: Department Comparison,Which department is most productive?,4.095433235168457,True,2025-09-30T18:01:35.690344
+Employee: Hours vs Productivity,Does working more hours increase productivity?,5.426726341247559,True,2025-09-30T18:01:41.117222
+Employee: Training Effectiveness,Is training effective?,4.6077001094818115,True,2025-09-30T18:01:45.725080
+Employee: Improvement Recommendations,How can we improve productivity?,15.375685930252075,True,2025-09-30T18:02:01.100906
+Employee: High Performer Detection,Find exceptional performers,20.4792799949646,True,2025-09-30T18:02:21.580344
+Fraud: Fraud Rate Calculation,What's the fraud rate?,3.5003678798675537,True,2025-09-30T18:02:28.946421
+Fraud: Fraud Pattern Detection,What are common fraud patterns?,19.892943859100342,True,2025-09-30T18:02:48.839529
+Fraud: Risk Factor Analysis,What makes a transaction high risk?,8.260533094406128,True,2025-09-30T18:02:57.100157
+Fraud: Merchant Risk Analysis,Which merchants have most fraud?,3.789926290512085,True,2025-09-30T18:03:00.890210
+Fraud: Detection Strategy,How would you detect fraud?,20.685261964797974,True,2025-09-30T18:03:21.575631
+Fraud: Class Balance Check,Is the data balanced?,4.094188928604126,True,2025-09-30T18:03:25.669996
